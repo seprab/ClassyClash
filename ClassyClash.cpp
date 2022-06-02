@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "raymath.h"
+#include "external/glfw/include/GLFW/glfw3.h"
 
 static const Vector2 windowDimensions{384, 384};
 static const char* window_title = "Classy Clasher";
@@ -52,6 +53,7 @@ int main()
             };
             DrawTexturePro(knight, knightSouce, knightDest, Vector2{}, 0.0f, WHITE);
         EndDrawing();
+        glFinish();
     }
     UnloadTexture(map);
     UnloadTexture(knight);
