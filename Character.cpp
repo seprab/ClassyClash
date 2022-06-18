@@ -1,70 +1,79 @@
 #include "Character.h"
 #include "raymath.h"
 
-void Character::tick(float deltaTime)
-{
-    worldPosLastFrame = worldPos;
-    Vector2 direction{0.0, 0.0};
-    if (IsKeyDown(KEY_A))
-        direction.x -= 1.0;
-    if (IsKeyDown(KEY_D))
-        direction.x += 1.0;
-    if (IsKeyDown(KEY_W))
-        direction.y -= 1.0;
-    if (IsKeyDown(KEY_S))
-        direction.y += 1.0;
 
-    float directionMagnitude = Vector2Length(direction);
-    if (directionMagnitude != 0.0)
-    {
-        direction = Vector2Scale(Vector2Normalize(direction), speed);
-        worldPos = Vector2Add(worldPos, direction);
-        rightLeft = direction.x < 0 ? -1.f : 1.f;
-    }
+Character::Character(float winWidth, float winHeight) :
+windowWidth {winWidth}, windowHeight {winHeight}
+{
+    textureIdle = LoadTexture("Resources/characters/knight_idle_spritesheet.png");
+    textureRun = LoadTexture("Resources/characters/knight_run_spritesheet.png");
+    texture = textureIdle;
 
-    runningTime += deltaTime;
-    if (runningTime > updateTime)
-    {
-        frame++;
-        runningTime = 0;
-        if (frame > maxFrames)
-            frame = 0;
-    }
-    Rectangle souce{
-        frame * rightLeft * width,
-        0.0f,
-        rightLeft * width,
-        height};
-    Rectangle destination{
-        screenPos.x,
-        screenPos.y,
-        width * scale,
-        height * scale};
-    DrawTexturePro(directionMagnitude ? textureRun : textureIdle, souce, destination, Vector2{}, 0.0f, WHITE);
-}
-void Character::UndoMovement()
-{
-    worldPos = worldPosLastFrame;
-}
-Character::Character(float winWidth, float winHeight)
-{
     width = textureIdle.width / maxFrames;
     height = textureIdle.height;
-    screenPos = {
-        (winWidth / 2.0f) - (scale * (0.5f * width)),
-        (winHeight / 2.0f) - (scale * (0.5f * height))};
 }
 Character::~Character()
 {
     UnloadTexture(textureIdle);
     UnloadTexture(textureRun);
 }
-Rectangle Character::GetCollisionRec()
+void Character::Tick(float deltaTime)
+{   
+    
+    if (IsKeyDown(KEY_A))
+        velocity.x -= 1.0;
+    if (IsKeyDown(KEY_D))
+        velocity.x += 1.0;
+    if (IsKeyDown(KEY_W))
+        velocity.y -= 1.0;
+    if (IsKeyDown(KEY_S))
+        velocity.y += 1.0;   
+
+    BaseCharacter::Tick(deltaTime);
+
+    Vector2 origin{};
+    Vector2 offset{};
+    float rotation{};
+    if (rightLeft > 0.f)
+    {
+        origin = {0.f, sword.height * scale};
+        offset = {35.f, 55.f};
+        swordCollisionRec = {
+            GetScreenPos().x + offset.x,
+            GetScreenPos().y + offset.y - sword.height * scale,
+            sword.width * scale,
+            sword.height * scale
+        };
+        rotation = 35.f;
+    }
+    else
+    {
+        origin = {sword.width * scale, sword.height * scale};
+        offset = {25.f, 55.f};
+        swordCollisionRec = {
+            GetScreenPos().x + offset.x - sword.width * scale,
+            GetScreenPos().y + offset.y - sword.height * scale,
+            sword.width * scale,
+            sword.height * scale
+        };
+        rotation = -35.f;
+    }
+    Rectangle swordSource = {0.f,0.f, static_cast<float>(sword.width)* rightLeft, static_cast<float>(sword.height)};
+    Rectangle swordDest{GetScreenPos().x + offset.x, GetScreenPos().y + offset.y, sword.width * scale, sword.height * scale};
+    DrawTexturePro(sword, swordSource, swordDest, origin, rotation, WHITE);
+
+    DrawRectangleLines(
+        swordCollisionRec.x,
+        swordCollisionRec.y,
+        swordCollisionRec.width,
+        swordCollisionRec.height,
+        RED
+    );
+
+}
+Vector2 Character::GetScreenPos()
 {
-    return Rectangle{
-        screenPos.x,
-        screenPos.y,
-        width * scale,
-        height * scale
-    };
+    return {
+        (windowWidth / 2.0f) - (scale * (0.5f * width)),
+        (windowHeight / 2.0f) - (scale * (0.5f * height))};
 }

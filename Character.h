@@ -1,31 +1,21 @@
+#ifndef CHARACTER_H
+#define CHARACTER_H
 #include "raylib.h"
+#include "BaseCharacter.h"
 
-class Character
+class Character : public BaseCharacter
 {
 public:
     Character(float winWidth, float winHeight);
     ~Character();
-    Vector2 GetworldPos() { return worldPos; }
     void SetScreenPos(float winWidth, float winHeight);
-    void tick(float deltaTime);
-    void UndoMovement();
-    Rectangle GetCollisionRec();
+    virtual void Tick(float delaTime) override;
+    virtual Vector2 GetScreenPos() override;
 
 private:
-    Texture2D textureIdle{LoadTexture("Resources/characters/knight_idle_spritesheet.png")};
-    Texture2D textureRun{LoadTexture("Resources/characters/knight_run_spritesheet.png")};
-
-    Vector2 screenPos{};
-    Vector2 worldPos{};
-    Vector2 worldPosLastFrame{};
-
-    int frame{};
-    int rightLeft{1};
-    float runningTime{};
-    float speed{4.f};
-    float scale{4.f};
-    float width{};
-    float height{};
-    int maxFrames{6};
-    float updateTime{1.f / 12.f}; // Update the knightIdle 12 times per frame
+    float windowWidth {};
+    float windowHeight {};
+    Texture2D sword {LoadTexture("Resources/characters/weapon_sword.png")};
+    Rectangle swordCollisionRec {};
 };
+#endif
