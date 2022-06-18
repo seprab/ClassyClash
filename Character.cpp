@@ -19,7 +19,8 @@ Character::~Character()
 }
 void Character::Tick(float deltaTime)
 {   
-    
+    if(!GetAlive()) return;
+
     if (IsKeyDown(KEY_A))
         velocity.x -= 1.0;
     if (IsKeyDown(KEY_D))
@@ -44,7 +45,7 @@ void Character::Tick(float deltaTime)
             sword.width * scale,
             sword.height * scale
         };
-        rotation = 35.f;
+        rotation = IsKeyDown(KEY_SPACE) ? 35.f : 0.f;
     }
     else
     {
@@ -56,7 +57,7 @@ void Character::Tick(float deltaTime)
             sword.width * scale,
             sword.height * scale
         };
-        rotation = -35.f;
+        rotation = IsKeyDown(KEY_SPACE) ? -35.f : 0.f;
     }
     Rectangle swordSource = {0.f,0.f, static_cast<float>(sword.width)* rightLeft, static_cast<float>(sword.height)};
     Rectangle swordDest{GetScreenPos().x + offset.x, GetScreenPos().y + offset.y, sword.width * scale, sword.height * scale};
@@ -76,4 +77,12 @@ Vector2 Character::GetScreenPos()
     return {
         (windowWidth / 2.0f) - (scale * (0.5f * width)),
         (windowHeight / 2.0f) - (scale * (0.5f * height))};
+}
+void Character::TakeDamage(float damage)
+{
+    health -= damage;
+    if(health<=0.f)
+    {
+        SetAlive(false);
+    }
 }

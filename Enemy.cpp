@@ -19,8 +19,14 @@ Enemy::~Enemy()
 }
 void Enemy::Tick(float deltaTime)
 {
+    if(!GetAlive()) return;
     velocity = Vector2Subtract(target->GetScreenPos(), GetScreenPos());
+    if(Vector2Length(velocity)<radiusToStop) velocity={};
     BaseCharacter::Tick(deltaTime);
+    if (CheckCollisionRecs(target->GetCollisionRec(), GetCollisionRec()))
+    {
+        target->TakeDamage(damagePerSecond * deltaTime);
+    }
 }
 Vector2 Enemy::GetScreenPos()
 {

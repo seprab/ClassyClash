@@ -13,6 +13,8 @@ public:
     void UndoMovement();
     virtual void Tick(float deltaTime);
     virtual Vector2 GetScreenPos() = 0;
+    bool GetAlive() {return alive;}
+    void SetAlive(bool _alive) {alive = _alive;}
 
 protected:
     Vector2 worldPos{};
@@ -33,5 +35,6 @@ protected:
     Texture2D textureRun{};
     Texture2D texture{};
 private:
+    bool alive {true};
 };
 #endif

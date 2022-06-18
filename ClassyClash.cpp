@@ -4,6 +4,7 @@
 #include "Character.h"
 #include "Prop.h"
 #include "Enemy.h"
+#include <string>
 
 static const Vector2 windowDimensions{384, 384};
 static const char *window_title = "Classy Clasher";
@@ -18,9 +19,12 @@ int main()
     Vector2 mapPos{0.0f, 0.0f};
     const float mapScale{4.f};
     Character player{windowDimensions.x ,windowDimensions.y};
-    Enemy enemies[1]
+    Enemy enemies[]
     {
-        Enemy{Vector2{}, LoadTexture("Resources/characters/goblin_idle_spritesheet.png"), LoadTexture("Resources/characters/goblin_run_spritesheet.png")}
+        Enemy{Vector2{}, LoadTexture("Resources/characters/goblin_idle_spritesheet.png"), LoadTexture("Resources/characters/goblin_run_spritesheet.png")},
+        Enemy{Vector2{static_cast<float>(map.width), 0.f}, LoadTexture("Resources/characters/slime_idle_spritesheet.png"), LoadTexture("Resources/characters/slime_run_spritesheet.png")},
+        Enemy{Vector2{static_cast<float>(map.width), static_cast<float>(map.height)}, LoadTexture("Resources/characters/slime_idle_spritesheet.png"), LoadTexture("Resources/characters/slime_run_spritesheet.png")},
+        Enemy{Vector2{0.f, static_cast<float>(map.height)}, LoadTexture("Resources/characters/goblin_idle_spritesheet.png"), LoadTexture("Resources/characters/goblin_run_spritesheet.png")}
     };
     for(auto& enemy : enemies) enemy.SetTarget(&player);
     Prop props[2]
@@ -37,6 +41,20 @@ int main()
         DrawTextureEx(map, mapPos, 0.f, mapScale, WHITE);
         
         for(auto& prop : props) prop.Render(player.GetworldPos());
+
+        if(player.GetAlive())
+        {
+            std::string playerHealth = "Health: ";
+            playerHealth.append(std::to_string(player.GetHealth()), 0, 5);
+            DrawText(playerHealth.c_str(), 55.f, 45.f, 40, RED);
+        }
+        else
+        {
+            DrawText("Game Over!", 55.f, 45.f, 40, RED);
+            EndDrawing();
+            glFinish();
+            continue;
+        }
 
         player.Tick(GetFrameTime());
         if( player.GetworldPos().x < 0.f ||
@@ -55,8 +73,17 @@ int main()
                 player.UndoMovement();
             }
         }
-        for(auto& enemy : enemies) enemy.Tick(GetFrameTime());
-
+        for(auto& enemy : enemies) 
+        {
+            enemy.Tick(GetFrameTime());
+            if(IsKeyPressed(KEY_SPACE))
+            {
+                if (CheckCollisionRecs(enemy.GetCollisionRec(), player.GetSwordCollisionRec()))
+                {
+                    enemy.SetAlive(false);
+                }
+            }
+        }
         
         EndDrawing();
         glFinish();
